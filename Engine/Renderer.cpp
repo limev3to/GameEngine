@@ -49,6 +49,11 @@ namespace nu
         SDL_SetRenderDrawColor(m_renderer, r, g, b, a);
     }
 
+    void Renderer::SetColor(float r, float g, float b, float a)
+    {
+        SDL_SetRenderDrawColorFloat(m_renderer, r, g, b, a);
+    }
+
     void Renderer::DrawPoint(float x, float y)
     {
         SDL_RenderPoint(m_renderer, x, y);
