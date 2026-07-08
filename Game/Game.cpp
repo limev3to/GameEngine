@@ -11,14 +11,11 @@ int main()
     Input input;
     input.Initialize();
 
-    //std::cout << sizeof(Vector2) << std::endl;
-    Vector2 vel{ 0.5f, 0.0f };
+    Time time;
 
-    std::vector<Vector2> v;
-
-    for (int i = 0; i < 300; i++) {
-        v.push_back({ RandomFloat(1280), RandomFloat(1024) });
-    }
+    Vector2 position{ 640.0f, 512.0f };
+    float speed = 400.0f;
+    std::vector<Vector2> points;
     
     // MAIN LOOP
     bool quit = false;
@@ -39,13 +36,37 @@ int main()
         
         // engine
         input.Update();
+        time.Tick();
 
-        if (input.GetKeyPressed(SDL_SCANCODE_Q)) std::cout << "pressed\n";
-        if (input.GetKeyDown(SDL_SCANCODE_Q)) std::cout << "down\n";
-        if (input.GetKeyReleased(SDL_SCANCODE_Q)) std::cout << "released\n";
+        //prevTicks = ticks;
+        //ticks = SDL_GetTicksNS(); // 1,000,000,000 ticks/second
+        //float seconds = (float)ticks / 1000'000'000.0f;
+        //float dt = (ticks - prevTicks) / 1000'000'000.0f;
+        
+        //std::cout << seconds << " " << dt << std::endl;
+        //if (input.GetKeyPressed(SDL_SCANCODE_Q)) std::cout << "pressed\n";
+        //if (input.GetKeyDown(SDL_SCANCODE_Q)) std::cout << "down\n";
+        //if (input.GetKeyReleased(SDL_SCANCODE_Q)) std::cout << "released\n";
+        //if (input.GetButtonPressed(Input::MouseButton::Left))  std::cout << "button pressed\n";
+
+
 
         Vector2 mousePosition;
         SDL_GetMouseState(&mousePosition.x, &mousePosition.y);
+
+
+        if (input.GetButtonPressed(Input::MouseButton::Left)) {
+            points.push_back(input.GetMousePosition());
+        }
+
+
+        Vector2 velocity{ 0.0f, 0.0f };
+        if (input.GetKeyDown(SDL_SCANCODE_A)) velocity.x = -speed;
+        if (input.GetKeyDown(SDL_SCANCODE_D)) velocity.x = +speed;
+        if (input.GetKeyDown(SDL_SCANCODE_W)) velocity.y = -speed;
+        if (input.GetKeyDown(SDL_SCANCODE_S)) velocity.y = +speed;
+
+        position += (velocity * time.GetDeltaTime());
 
 
         // RENDER
@@ -53,15 +74,16 @@ int main()
         renderer.Clear();
 
         //Renders Random Points
-        for (size_t i = 0; i < v.size(); i++) {
+        for (size_t i = 0; i < points.size(); i++) {
             renderer.SetColor(RandomFloat(), RandomFloat(256), RandomFloat(256));
-
-            v[i] = v[i] + vel;
-            renderer.DrawPoint(v[i].x, v[i].y);
+            renderer.DrawFillRect(points[i].x, points[i].y, 10, 10);
         }
 
+        // character
         renderer.SetColor(0.0f, 0.0f, 1.0f);
-        renderer.DrawFillRect(input.GetMousePosition().x - 20, input.GetMousePosition().y - 20, 40, 40);
+        renderer.DrawFillRect(position.x - 20, position.y - 20, 40, 40);
+
+        //points[i] = points[i] + vel;
 
         ////Renders Lines
         //for (int i = 0; i < 500; i++) {

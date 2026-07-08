@@ -28,4 +28,14 @@ namespace nu {
 		m_prevButtonStates = m_buttonStates; // store last frame button states
 		m_buttonStates = SDL_GetMouseState(&m_mousePosition.x, &m_mousePosition.y);
 	}
+
+	uint32_t Input::GetButtonBit(MouseButton button) const
+	{
+		// 0100 (right mb pressed)
+
+		// 1 -> 0001
+		// 2 -> 0010
+		// 3 -> 0100
+		return SDL_BUTTON_MASK((uint32_t)button);
+	}
 }
