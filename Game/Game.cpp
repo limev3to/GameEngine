@@ -7,14 +7,12 @@ int main()
     // INITIALIZATION
     nu::Renderer renderer;
     renderer.Initialize("Game Engine", 1920, 1024);
-
     Input input;
     input.Initialize();
-
     Time time;
-
     Vector2 position{ 640.0f, 512.0f };
     float speed = 400.0f;
+
     std::vector<Vector2> points;
     
     // MAIN LOOP
@@ -49,16 +47,25 @@ int main()
         //if (input.GetKeyReleased(SDL_SCANCODE_Q)) std::cout << "released\n";
         //if (input.GetButtonPressed(Input::MouseButton::Left))  std::cout << "button pressed\n";
 
-
-
         Vector2 mousePosition;
         SDL_GetMouseState(&mousePosition.x, &mousePosition.y);
 
+        // ADD TO POINTS VECTOR ON CLICK
+        if (input.GetButtonDown(Input::MouseButton::Left)) {
 
-        if (input.GetButtonPressed(Input::MouseButton::Left)) {
-            points.push_back(input.GetMousePosition());
+            Vector2 position;
+            position = input.GetMousePosition();
+
+            if (points.size() > 0) {
+                if ((position - points.back()).Length() > 10) {
+                    points.push_back(position);
+                }
+            }
+            else {
+                points.push_back(position);
+            }
+
         }
-
 
         Vector2 velocity{ 0.0f, 0.0f };
         if (input.GetKeyDown(SDL_SCANCODE_A)) velocity.x = -speed;
@@ -73,25 +80,36 @@ int main()
         renderer.SetColor(0.0f, 0.0f, 0.0f);
         renderer.Clear();
 
-        //Renders Random Points
-        for (size_t i = 0; i < points.size(); i++) {
-            renderer.SetColor(RandomFloat(), RandomFloat(256), RandomFloat(256));
-            renderer.DrawFillRect(points[i].x, points[i].y, 10, 10);
+        for (size_t i = 1; i < points.size(); i++)
+        {
+            renderer.SetColor(RandomFloat(256), RandomFloat(256), RandomFloat(256));
+            renderer.DrawLine(points[i - 1].x, points[i - 1].y, points[i].x, points[i].y);
         }
 
+        // Renders Box
+        /*for (size_t i = 0; i < points.size(); i++) {
+            renderer.SetColor(RandomFloat(256), RandomFloat(256), RandomFloat(256));
+            renderer.DrawFillRect(points[i].x, points[i].y, 10, 10);
+        }*/
+
         // character
-        renderer.SetColor(0.0f, 0.0f, 1.0f);
-        renderer.DrawFillRect(position.x - 20, position.y - 20, 40, 40);
-
+        //renderer.SetColor(0.0f, 0.0f, 1.0f);
+        //renderer.DrawFillRect(position.x - 20, position.y - 20, 40, 40);
         //points[i] = points[i] + vel;
-
-        ////Renders Lines
-        //for (int i = 0; i < 500; i++) {
-        //    renderer.SetColor(RandomFloat(), RandomFloat(), RandomFloat());
-        //    renderer.DrawLine(800, 800, 700, 700);
+        
+        // Renders Random Points
+        //for (int i = 0; i < 300; i++) {
+        //    renderer.SetColor(RandomFloat(), RandomFloat(256), RandomFloat(256));
+        //    renderer.DrawPoint(RandomFloat(1920), RandomFloat(1024));
         //}
 
-        ////Renders Squares
+        //Renders Random Lines
+        //for (int i = 0; i < 500; i++) {
+        //    renderer.SetColor(RandomFloat(), RandomFloat(), RandomFloat());
+        //    renderer.DrawLine(RandomFloat(), RandomFloat(), RandomFloat(), RandomFloat());
+        //}
+
+        //Renders Random Squares
         //for (int i = 0; i < 1000; i++) {
         //    renderer.SetColor(RandomFloat(256), RandomFloat(256), RandomFloat(256));
         //    renderer.DrawRect(800, 700, 100, 100);
