@@ -10,7 +10,6 @@ namespace nu {
 			struct { float r, g, b; };
 		};
 
-
 		Vector3() = default;
 		Vector3(float x, float y, float z) : x{ x }, y{ y }, z{ z } {}
 		explicit Vector3(float v) : x{ v }, y{ y }, z{ z } {}
@@ -21,8 +20,6 @@ namespace nu {
 		bool operator == (const Vector3& v) const { return (this->x == v.x && this->y == v.y); }
 		bool operator != (const Vector3& v) const { return (this->x != v.x || this->y != v.y); }
 
-
-		// OPERATOR OVERLOADS
 		Vector3 operator + (const Vector3& v) const { return Vector3{ this->x + v.x, this->y + v.y, this->z + v.z }; }
 		Vector3 operator - (const Vector3& v) const { return Vector3{ this->x - v.x, this->y - v.y, this->z - v.z }; }
 		Vector3 operator * (const Vector3& v) const { return Vector3{ this->x * v.x, this->y * v.y, this->z * v.z }; }
@@ -38,17 +35,15 @@ namespace nu {
 		Vector3 operator *= (const Vector3& v) { this->x *= v.x; this->y *= v.y; this->z *= v.z; return *this; };
 		Vector3 operator /= (const Vector3& v) { this->x /= v.x; this->y /= v.y; this->z /= v.z; return *this; };
 			  
-		Vector3 operator += (float v) { this->x += v; this->y += v; return *this; };
-		Vector3 operator -= (float v) { this->x -= v; this->y -= v; return *this; };
-		Vector3 operator *= (float v) { this->x *= v; this->y *= v; return *this; };
-		Vector3 operator /= (float v) { this->x /= v; this->y /= v; return *this; };
+		Vector3 operator -= (float v) { this->x -= v; this->y -= v; this->z -= v; return *this; };
+		Vector3 operator *= (float v) { this->x *= v; this->y *= v; this->z *= v; return *this; };
+		Vector3 operator /= (float v) { this->x /= v; this->y /= v; this->z /= v; return *this; };
+		Vector3 operator += (float v) { this->x += v; this->y += v; this->z += v; return *this; };
 
-
-		
-
-
-
-
+		float Length() const { return std::sqrt(LengthSqr()); }
+		float LengthSqr() const { return (x * x) + (y * y) + (z * z); }
+		Vector3 Normalized() const { return (*this) / Length(); }
+		float Dot(const Vector3& v) const { return (this->x * v.x) + (this->y * v.y) + (this->z * v.z); }
 
 	};
 		using Color = Vector3;
