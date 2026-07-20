@@ -1,27 +1,55 @@
 #include "Engine.h"
+#include "Player.h"
+#include "Enemy.h"
+
+#include <iostream>
+#include <vector>
 
 using namespace nu;
 
 int main()
 {
     // INITIALIZATION
-    nu::Renderer renderer;
-    renderer.Initialize("Game Engine", 1920, 1024);
+    engine.Initialize();
 
-    Input input;
-    input.Initialize();
+    // mesh / model
+    //Mesh mesh{ { Vector2{ 2, 0 }, Vector2{ -2, 2 }, Vector2{ -1, 0 }, Vector2{ -2, -2 }, Vector2{ 2, 0 } }, Color{ 1.0f, 1.0f, 1.0f } };
+    Mesh mesh{ { Vector2{ 10, 0 }, Vector2{ 7, -8 }, Vector2{ -7, -8 }, Vector2{ -10, 0 }, Vector2{ -7, 8 }, Vector2 { 7 , 8 }, Vector2 { 10 , 0 } }, Color{ 0.9f, 0.8f, 1.0f } };
+    Mesh mesh2{ { Vector2{ 7, -8 }, Vector2{ 4, -13 }, Vector2{ 1, -8 } }, Color{ 1.0f, 0.0f, 0.5f } };
+    Mesh mesh3{ { Vector2{ -7, -8 }, Vector2{ -4, -13 }, Vector2{ -1, -8 } }, Color{ 1.0f, 0.0f, 0.5f } };
+    Mesh mesh4{ { Vector2{ 3, -1 }, Vector2{ 3, -4 }, Vector2{ 5, -4 }, Vector2{ 5, -1 }, Vector2{ 3, -1 } }, Color{ 0.2f, 0.2f, 0.8f } };
+    Mesh mesh5{ { Vector2{ -3, -1 }, Vector2{ -3, -4 }, Vector2{ -5, -4 }, Vector2{ -5, -1 }, Vector2{ -3, -1 } }, Color{ 0.2f, 0.2f, 0.8f } };
     
-    Time time;
+    Model model{ std::vector<Mesh> { mesh } };
+    model.AddMesh(mesh2);
+    model.AddMesh(mesh3);
+    model.AddMesh(mesh4);
+    model.AddMesh(mesh5);
 
-    //std::vector<Vector2> points{ { -3, 3 }, { 3, 3 } };
-    Mesh mesh{ { Vector2{ -3, 3 }, Vector2{ 3, 3 }, Vector2{ 0, 0 } }, Color{0.0f, 0.0f, 1.0f} };
+    Scene scene;
 
-    Actor player{ Transform{ Vector2 { 640.0f, 512.0f }, 0.0f, 50.0f }, std::vector<Mesh> { mesh } };
+    PlayerDesc playerDesc;
+    playerDesc.name = "Player";
+    playerDesc.model = model;
+    playerDesc.transform = Transform{ Vector2{ 640.0f, 512.0f }, 0.0f, 15.0f };
+    playerDesc.velocity = Vector2{ 0.0f, 0.0f };
+    playerDesc.speed = 2000.0f;
 
-    Vector2 position{ 640.0f, 512.0f };
-    Vector2 velocity{ 0.0f, 0.0f };
-    float speed = 800.0f;
+    Player* player = new Player{ playerDesc };
+    scene.AddActor(player);
+        
+    //for (int i = 0; i < 20; i++) {
+    //    EnemyDesc enemyDesc;
+    //    enemyDesc.name = "Enemy";
+    //    enemyDesc.model = model;
+    //    enemyDesc.transform = Transform{ Vector2{ nu::RandomFloat((float)nu::engine.GetRenderer().GetWidth()), nu::RandomFloat((float)nu::engine.GetRenderer().GetHeight())}, 0.0f, 10.0f };
+    //    enemyDesc.speed = 2000.0f;
 
+    //    Enemy* enemy = new Enemy{ enemyDesc };
+    //    scene.AddActor(enemy);
+    //}
+
+    // Drawing
     std::vector<Vector2> points;
     
     // MAIN LOOP
@@ -42,27 +70,18 @@ int main()
         }
         
         // engine
-        input.Update();
-        time.Tick();
-
-        //prevTicks = ticks;
-        //ticks = SDL_GetTicksNS(); // 1,000,000,000 ticks/second
-        //float seconds = (float)ticks / 1000'000'000.0f;
-        //float dt = (ticks - prevTicks) / 1000'000'000.0f;
-        //std::cout << seconds << " " << dt << std::endl;
-        //if (input.GetKeyPressed(SDL_SCANCODE_Q)) std::cout << "pressed\n";
-        //if (input.GetKeyDown(SDL_SCANCODE_Q)) std::cout << "down\n";
-        //if (input.GetKeyReleased(SDL_SCANCODE_Q)) std::cout << "released\n";
-        //if (input.GetButtonPressed(Input::MouseButton::Left))  std::cout << "button pressed\n";
+        float dt = engine.GetTime().GetDeltaTime();
+        engine.Update();
+        scene.Update(dt);
  
         Vector2 mousePosition;
         SDL_GetMouseState(&mousePosition.x, &mousePosition.y);
 
-        // Drawing (with mouse) Logic
-        if (input.GetButtonDown(Input::MouseButton::Left)) {
+        // Drawing Logic
+        if (engine.GetInput().GetButtonDown(Input::MouseButton::Left)) {
 
             Vector2 position;
-            position = input.GetMousePosition();
+            position = engine.GetInput().GetMousePosition();
 
             if (points.size() > 0) {
                 if ((position - points.back()).Length() > 10) {
@@ -75,65 +94,22 @@ int main()
 
         }
 
-        Vector2 force{ 0.0f, 0.0f };
-        if (input.GetKeyDown(SDL_SCANCODE_A)) force.x = -speed;
-        if (input.GetKeyDown(SDL_SCANCODE_D)) force.x = +speed;
-        if (input.GetKeyDown(SDL_SCANCODE_W)) force.y = -speed;
-        if (input.GetKeyDown(SDL_SCANCODE_S)) force.y = +speed;
-
-        player.SetVelocity(player.GetVelocity() + (force * time.GetDeltaTime()));
-        player.Update(time.GetDeltaTime());
-
-        //velocity += (force * time.GetDeltaTime());
-        //position += (velocity * time.GetDeltaTime());
-        //position.x = Wrap(0.0f, 1280.0f, position.x);
-        //position.y = Wrap(0.0f, 1024.0f, position.y);
-
         // RENDER
-        renderer.SetColor(0.0f, 0.0f, 0.0f);
-        renderer.Clear();
+        engine.GetRenderer().SetColor(0.0f, 0.0f, 0.0f);
+        engine.GetRenderer().Clear();
 
         for (size_t i = 1; i < points.size(); i++)
         {
-            renderer.SetColor(RandomFloat(256), RandomFloat(256), RandomFloat(256));
-            renderer.DrawLine(points[i - 1].x, points[i - 1].y, points[i].x, points[i].y);
+            engine.GetRenderer().SetColor(RandomFloat(256), RandomFloat(256), RandomFloat(256));
+            engine.GetRenderer().DrawLine(points[i - 1].x, points[i - 1].y, points[i].x, points[i].y);
         }
 
-        // Renders Box
-        //for (size_t i = 0; i < points.size(); i++) {
-        //    renderer.SetColor(RandomFloat(256), RandomFloat(256), RandomFloat(256));
-        //    renderer.DrawFillRect(points[i].x, points[i].y, 10, 10);
-        //}
+        scene.Draw(engine.GetRenderer());
 
-        // character
-        player.Draw(renderer);
-        //renderer.SetColor(0.0f, 0.0f, 1.0f);
-        //renderer.DrawFillRect(position.x - 20, position.y - 20, 40, 40);
-        
-        //points[i] = points[i] + vel;
-        // Renders Random Points
-        //for (int i = 0; i < 300; i++) {
-        //    renderer.SetColor(RandomFloat(), RandomFloat(256), RandomFloat(256));
-        //    renderer.DrawPoint(RandomFloat(1920), RandomFloat(1024));
-        //}
-
-        //Renders Random Lines
-        //for (int i = 0; i < 500; i++) {
-        //    renderer.SetColor(RandomFloat(), RandomFloat(), RandomFloat());
-        //    renderer.DrawLine(RandomFloat(), RandomFloat(), RandomFloat(), RandomFloat());
-        //}
-
-        //Renders Random Squares
-        //for (int i = 0; i < 1000; i++) {
-        //    renderer.SetColor(RandomFloat(256), RandomFloat(256), RandomFloat(256));
-        //    renderer.DrawRect(800, 700, 100, 100);
-        //}
-        
-        renderer.Present();
+        engine.GetRenderer().Present();
     }
 
     // SHUTDOWN
-    renderer.Shutdown();
-
+    engine.GetRenderer().Shutdown();
     return 0;
 }
