@@ -1,8 +1,10 @@
 #include "Engine.h"
 #include "Player.h"
 #include "Enemy.h" 
-#include <fmod.hpp>
+#include "Assets.h"
+#include "File.h"
 
+#include <fmod.hpp>
 #include <iostream>
 #include <vector>
 
@@ -10,8 +12,9 @@ using namespace nu;
 
 int main()
 {
+    
     // INITIALIZATION
-    engine.Initialize();
+    Engine::Get().Initialize();
 
     // create audio system
     FMOD::System* audio;
@@ -48,25 +51,84 @@ int main()
 
 
 
+
+
+    // get current working directory
+    std::cout << "Directory Operations:\n";
+    std::cout << "Working directory: " << nu::GetWorkingDirectory() << "\n";
+
+    // set working directory (current working directory + "Assets")
+    std::cout << "Setting directory to 'Assets'...\n";
+    nu::SetWorkingDirectory("Assets");
+    std::cout << "New directory: " << nu::GetWorkingDirectory() << "\n\n";
+
+    // get filenames in the working directory
+    std::cout << "Files in Directory:\n";
+    auto filenames = nu::GetFilesInDirectory(nu::GetWorkingDirectory());
+    for (const auto& filename : filenames)
+    {
+        std::cout << filename << "\n";
+    }
+    std::cout << "\n";
+
+    // get filename info
+    if (!filenames.empty())
+    {
+        // get filename
+        std::string str = nu::GetFilename(filenames[0]);
+        std::cout << "Filename: " << str << "\n";
+
+        // get extension
+        str = nu::GetFileExtension(filenames[0]);
+        std::cout << "Extension: " << str << "\n";
+
+        // get filename no extension
+        str = nu::GetFilenameNoExtension(filenames[0]);
+        std::cout << "Filename No Extension: " << str << "\n\n";
+    }
+
+    // read and display text file
+    std::cout << "Text File Reading:\n";
+    std::string str;
+    if (nu::ReadTextFile("test.txt", str))
+    {
+        std::cout << str << "\n";
+    }
+
+    // write to text file
+    std::cout << "Text File Writing:\n";
+    nu::WriteTextFile("test.txt", "Hello, World!", true);
+    if (nu::ReadTextFile("test.txt", str))
+    {
+        std::cout << str << "\n";
+    }
+
+
+
+
+
+
+
+
     // mesh / model
     //Mesh mesh{ { Vector2{ 2, 0 }, Vector2{ -2, 2 }, Vector2{ -1, 0 }, Vector2{ -2, -2 }, Vector2{ 2, 0 } }, Color{ 1.0f, 1.0f, 1.0f } };
-    Mesh mesh{ { Vector2{ 10, 0 }, Vector2{ 7, -8 }, Vector2{ -7, -8 }, Vector2{ -10, 0 }, Vector2{ -7, 8 }, Vector2 { 7 , 8 }, Vector2 { 10 , 0 } }, Color{ 0.9f, 0.8f, 1.0f } };
-    Mesh mesh2{ { Vector2{ 7, -8 }, Vector2{ 4, -13 }, Vector2{ 1, -8 } }, Color{ 1.0f, 0.0f, 0.5f } };
-    Mesh mesh3{ { Vector2{ -7, -8 }, Vector2{ -4, -13 }, Vector2{ -1, -8 } }, Color{ 1.0f, 0.0f, 0.5f } };
-    Mesh mesh4{ { Vector2{ 3, -1 }, Vector2{ 3, -4 }, Vector2{ 5, -4 }, Vector2{ 5, -1 }, Vector2{ 3, -1 } }, Color{ 0.2f, 0.2f, 0.8f } };
-    Mesh mesh5{ { Vector2{ -3, -1 }, Vector2{ -3, -4 }, Vector2{ -5, -4 }, Vector2{ -5, -1 }, Vector2{ -3, -1 } }, Color{ 0.2f, 0.2f, 0.8f } };
-    
-    Model model{ std::vector<Mesh> { mesh } };
-    model.AddMesh(mesh2);
-    model.AddMesh(mesh3);
-    model.AddMesh(mesh4);
-    model.AddMesh(mesh5);
+    //Mesh mesh{ { Vector2{ 10, 0 }, Vector2{ 7, -8 }, Vector2{ -7, -8 }, Vector2{ -10, 0 }, Vector2{ -7, 8 }, Vector2 { 7 , 8 }, Vector2 { 10 , 0 } }, Color{ 0.9f, 0.8f, 1.0f } };
+    //Mesh mesh2{ { Vector2{ 7, -8 }, Vector2{ 4, -13 }, Vector2{ 1, -8 } }, Color{ 1.0f, 0.0f, 0.5f } };
+    //Mesh mesh3{ { Vector2{ -7, -8 }, Vector2{ -4, -13 }, Vector2{ -1, -8 } }, Color{ 1.0f, 0.0f, 0.5f } };
+    //Mesh mesh4{ { Vector2{ 3, -1 }, Vector2{ 3, -4 }, Vector2{ 5, -4 }, Vector2{ 5, -1 }, Vector2{ 3, -1 } }, Color{ 0.2f, 0.2f, 0.8f } };
+    //Mesh mesh5{ { Vector2{ -3, -1 }, Vector2{ -3, -4 }, Vector2{ -5, -4 }, Vector2{ -5, -1 }, Vector2{ -3, -1 } }, Color{ 0.2f, 0.2f, 0.8f } };
+    //
+    //Model model{ std::vector<Mesh> { mesh } };
+    //model.AddMesh(mesh2);
+    //model.AddMesh(mesh3);
+    //model.AddMesh(mesh4);
+    //model.AddMesh(mesh5);
 
     Scene scene;
 
     PlayerDesc playerDesc;
     playerDesc.name = "Player";
-    playerDesc.model = model;
+    playerDesc.model = assets::playerModel;
     playerDesc.transform = Transform{ Vector2{ 640.0f, 512.0f }, 0.0f, 15.0f };
     playerDesc.velocity = Vector2{ 0.0f, 0.0f };
     playerDesc.speed = 2000.0f;
@@ -74,16 +136,15 @@ int main()
     Player* player = new Player{ playerDesc };
     scene.AddActor(player);
         
-    //for (int i = 0; i < 20; i++) {
-    //    EnemyDesc enemyDesc;
-    //    enemyDesc.name = "Enemy";
-    //    enemyDesc.model = model;
-    //    enemyDesc.transform = Transform{ Vector2{ nu::RandomFloat((float)nu::engine.GetRenderer().GetWidth()), nu::RandomFloat((float)nu::engine.GetRenderer().GetHeight())}, 0.0f, 10.0f };
-    //    enemyDesc.speed = 2000.0f;
-
-    //    Enemy* enemy = new Enemy{ enemyDesc };
-    //    scene.AddActor(enemy);
-    //}
+    for (int i = 0; i < 20; i++) {
+        EnemyDesc enemyDesc;
+        enemyDesc.name = "Enemy";
+        enemyDesc.model = assets::playerModel;
+        enemyDesc.transform = Transform{ Vector2{ nu::RandomFloat((float)nu::Engine::Get().GetRenderer().GetWidth()), nu::RandomFloat((float)nu::Engine::Get().GetRenderer().GetHeight())}, 0.0f, 10.0f };
+        enemyDesc.speed = 2000.0f;
+        Enemy* enemy = new Enemy{ enemyDesc };
+        scene.AddActor(enemy);
+    }
 
     // Drawing
     std::vector<Vector2> points;
@@ -106,31 +167,31 @@ int main()
         }
 
         // Audio Keymapping
-        if (engine.GetInput().GetKeyPressed(SDL_SCANCODE_1))
+        if (Engine::Get().GetInput().GetKeyPressed(SDL_SCANCODE_1))
         {
             audio->playSound(sounds[0], nullptr, false, nullptr);
         }
-        if (engine.GetInput().GetKeyPressed(SDL_SCANCODE_2))
+        if (Engine::Get().GetInput().GetKeyPressed(SDL_SCANCODE_2))
         {
             audio->playSound(sounds[1], nullptr, false, nullptr);
         }
-        if (engine.GetInput().GetKeyPressed(SDL_SCANCODE_3))
+        if (Engine::Get().GetInput().GetKeyPressed(SDL_SCANCODE_3))
         {
             audio->playSound(sounds[2], nullptr, false, nullptr);
         }
-        if (engine.GetInput().GetKeyPressed(SDL_SCANCODE_4))
+        if (Engine::Get().GetInput().GetKeyPressed(SDL_SCANCODE_4))
         {
             audio->playSound(sounds[3], nullptr, false, nullptr);
         }
-        if (engine.GetInput().GetKeyPressed(SDL_SCANCODE_5))
+        if (Engine::Get().GetInput().GetKeyPressed(SDL_SCANCODE_5))
         {
             audio->playSound(sounds[4], nullptr, false, nullptr);
         }
         
         // engine
-        float dt = engine.GetTime().GetDeltaTime();
+        float dt = Engine::Get().GetTime().GetDeltaTime();
 
-        engine.Update();
+        Engine::Get().Update();
         scene.Update(dt);
         audio->update();
  
@@ -138,10 +199,10 @@ int main()
         SDL_GetMouseState(&mousePosition.x, &mousePosition.y);
 
         // Drawing Logic
-        if (engine.GetInput().GetButtonDown(Input::MouseButton::Left)) {
+        if (Engine::Get().GetInput().GetButtonDown(Input::MouseButton::Left)) {
 
             Vector2 position;
-            position = engine.GetInput().GetMousePosition();
+            position = Engine::Get().GetInput().GetMousePosition();
 
             if (points.size() > 0) {
                 if ((position - points.back()).Length() > 10) {
@@ -155,21 +216,21 @@ int main()
         }
 
         // RENDER
-        engine.GetRenderer().SetColor(0.0f, 0.0f, 0.0f);
-        engine.GetRenderer().Clear();
+        Engine::Get().GetRenderer().SetColor(0.0f, 0.0f, 0.0f);
+        Engine::Get().GetRenderer().Clear();
 
         for (size_t i = 1; i < points.size(); i++)
         {
-            engine.GetRenderer().SetColor(RandomFloat(256), RandomFloat(256), RandomFloat(256));
-            engine.GetRenderer().DrawLine(points[i - 1].x, points[i - 1].y, points[i].x, points[i].y);
+            Engine::Get().GetRenderer().SetColor(RandomFloat(256), RandomFloat(256), RandomFloat(256));
+            Engine::Get().GetRenderer().DrawLine(points[i - 1].x, points[i - 1].y, points[i].x, points[i].y);
         }
 
-        scene.Draw(engine.GetRenderer());
+        scene.Draw(Engine::Get().GetRenderer());
 
-        engine.GetRenderer().Present();
+        Engine::Get().GetRenderer().Present();
     }
 
     // SHUTDOWN
-    engine.GetRenderer().Shutdown();
+    Engine::Get().GetRenderer().Shutdown();
     return 0;
 }

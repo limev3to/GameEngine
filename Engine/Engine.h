@@ -16,13 +16,12 @@
 #include <iostream>
 #include <vector>
 
-
 namespace nu {
 	class Engine {
 
 	public:
-		Engine() = default;
-		
+		static Engine& Get() { static Engine engine; return engine; }
+
 		bool Initialize();
 		void Shutdown();
 
@@ -32,6 +31,9 @@ namespace nu {
 		Renderer& GetRenderer() { return m_renderer; }
 		Time& GetTime() { return m_time; }
 
+	private:
+		Engine() = default;
+
 
 	private:
 		Input m_input;
@@ -40,5 +42,4 @@ namespace nu {
 		Time m_time;
 	};
 
-	extern Engine engine;
 }
