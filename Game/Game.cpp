@@ -1,6 +1,7 @@
 #include "Engine.h"
 #include "Player.h"
-#include "Enemy.h"
+#include "Enemy.h" 
+#include <fmod.hpp>
 
 #include <iostream>
 #include <vector>
@@ -11,6 +12,41 @@ int main()
 {
     // INITIALIZATION
     engine.Initialize();
+
+    // create audio system
+    FMOD::System* audio;
+    FMOD::System_Create(&audio);
+    void* extradriverdata = nullptr;
+    audio->init(32, FMOD_INIT_NORMAL, extradriverdata);
+
+    // test FMOD working on startup
+    //FMOD::Sound* sound = nullptr;
+    //audio->createSound("test.wav", FMOD_DEFAULT, 0, &sound);
+    //audio->playSound(sound, 0, false, nullptr);
+
+    // create and store all sounds in vector
+    std::vector<FMOD::Sound*> sounds;
+    FMOD::Sound* sound = nullptr;
+
+    audio->createSound("alert.mp3", FMOD_DEFAULT, 0, &sound);
+    sounds.push_back(sound);
+
+    audio->createSound("duck-toy.mp3", FMOD_DEFAULT, 0, &sound);
+    sounds.push_back(sound);
+
+    audio->createSound("error.mp3", FMOD_DEFAULT, 0, &sound);
+    sounds.push_back(sound);
+
+    audio->createSound("mario.mp3", FMOD_DEFAULT, 0, &sound);
+    sounds.push_back(sound);
+
+    audio->createSound("oof.mp3", FMOD_DEFAULT, 0, &sound);
+    sounds.push_back(sound);
+
+    audio->createSound("whistle.mp3", FMOD_DEFAULT, 0, &sound);
+    sounds.push_back(sound);
+
+
 
     // mesh / model
     //Mesh mesh{ { Vector2{ 2, 0 }, Vector2{ -2, 2 }, Vector2{ -1, 0 }, Vector2{ -2, -2 }, Vector2{ 2, 0 } }, Color{ 1.0f, 1.0f, 1.0f } };
@@ -68,11 +104,35 @@ int main()
                 quit = true;
             }
         }
+
+        // Audio Keymapping
+        if (engine.GetInput().GetKeyPressed(SDL_SCANCODE_1))
+        {
+            audio->playSound(sounds[0], nullptr, false, nullptr);
+        }
+        if (engine.GetInput().GetKeyPressed(SDL_SCANCODE_2))
+        {
+            audio->playSound(sounds[1], nullptr, false, nullptr);
+        }
+        if (engine.GetInput().GetKeyPressed(SDL_SCANCODE_3))
+        {
+            audio->playSound(sounds[2], nullptr, false, nullptr);
+        }
+        if (engine.GetInput().GetKeyPressed(SDL_SCANCODE_4))
+        {
+            audio->playSound(sounds[3], nullptr, false, nullptr);
+        }
+        if (engine.GetInput().GetKeyPressed(SDL_SCANCODE_5))
+        {
+            audio->playSound(sounds[4], nullptr, false, nullptr);
+        }
         
         // engine
         float dt = engine.GetTime().GetDeltaTime();
+
         engine.Update();
         scene.Update(dt);
+        audio->update();
  
         Vector2 mousePosition;
         SDL_GetMouseState(&mousePosition.x, &mousePosition.y);
